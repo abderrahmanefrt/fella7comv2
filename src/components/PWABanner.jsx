@@ -32,16 +32,16 @@ export default function PWABanner() {
   useEffect(() => {
     // Monitor install state
     const checkInstallState = () => {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-      if (isStandalone) {
+      if (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true // for iOS Safari
+      ) {
         setIsInstalled(true);
         setShowInstallBanner(false);
       } else {
         setIsInstalled(false);
-        // Check if prompt was stashed globally
-        const prompt = window.deferredPrompt || deferredPrompt;
-        if (prompt && !localStorage.getItem('pwa-dismissed')) {
-          if (!deferredPrompt) setDeferredPrompt(prompt);
+        // Show banner if prompt exists and user hasn't dismissed it
+        if (deferredPrompt && !localStorage.getItem('pwa-dismissed')) {
           setShowInstallBanner(true);
         }
       }
@@ -54,19 +54,9 @@ export default function PWABanner() {
       e.preventDefault();
       // Stash the event so it can be triggered later.
       setDeferredPrompt(e);
-      window.deferredPrompt = e;
       // Show install banner if not dismissed and not in standalone mode
       if (!window.matchMedia('(display-mode: standalone)').matches && !localStorage.getItem('pwa-dismissed')) {
         setShowInstallBanner(true);
-      }
-    };
-
-    const handlePromptReady = () => {
-      if (window.deferredPrompt) {
-        setDeferredPrompt(window.deferredPrompt);
-        if (!window.matchMedia('(display-mode: standalone)').matches && !localStorage.getItem('pwa-dismissed')) {
-          setShowInstallBanner(true);
-        }
       }
     };
 
@@ -74,12 +64,10 @@ export default function PWABanner() {
       setIsInstalled(true);
       setShowInstallBanner(false);
       setDeferredPrompt(null);
-      window.deferredPrompt = null;
       console.log('PWA was installed successfully');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('pwa-prompt-ready', handlePromptReady);
     window.addEventListener('appinstalled', handleAppInstalled);
 
     // Connection status listeners
@@ -101,7 +89,6 @@ export default function PWABanner() {
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('pwa-prompt-ready', handlePromptReady);
       window.removeEventListener('appinstalled', handleAppInstalled);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -109,16 +96,14 @@ export default function PWABanner() {
   }, [deferredPrompt]);
 
   const handleInstallClick = async () => {
-    const prompt = deferredPrompt || window.deferredPrompt;
-    if (!prompt) return;
+    if (!deferredPrompt) return;
     // Show the install prompt
-    prompt.prompt();
+    deferredPrompt.prompt();
     // Wait for the user to respond to the prompt
-    const { outcome } = await prompt.userChoice;
+    const { outcome } = await deferredPrompt.userChoice;
     console.log(`User response to install prompt: ${outcome}`);
     if (outcome === 'accepted') {
       setDeferredPrompt(null);
-      window.deferredPrompt = null;
       setShowInstallBanner(false);
     }
   };
@@ -154,6 +139,21 @@ export default function PWABanner() {
         </div>
       )}
 
+      {/* Offline Ready Toast */}
+      {offlineReady && (
+        <div className="pwa-toast info animate-slide-up">
+          <div className="pwa-toast-content">
+            <CheckCircle2 size={20} className="toast-icon" />
+            <div>
+              <h4>Ready for Offline Use</h4>
+              <p>fella7com is cached and ready to work offline.</p>
+            </div>
+            <button onClick={closeOfflineReady} className="pwa-toast-close">
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Update Available Toast */}
       {needRefresh && (

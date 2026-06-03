@@ -13,16 +13,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="fella7com" />
-
-    <!-- Handle PWA install event immediately to prevent React loading race conditions -->
-    <script>
-      window.deferredPrompt = null;
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        window.deferredPrompt = e;
-        window.dispatchEvent(new CustomEvent('pwa-prompt-ready'));
-      });
-    </script>
   </head>
   <body>
     <div id="root"></div>
