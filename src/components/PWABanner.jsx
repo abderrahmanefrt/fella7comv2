@@ -32,16 +32,16 @@ export default function PWABanner() {
   useEffect(() => {
     // Monitor install state
     const checkInstallState = () => {
-      if (
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true // for iOS Safari
-      ) {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      if (isStandalone) {
         setIsInstalled(true);
         setShowInstallBanner(false);
       } else {
         setIsInstalled(false);
-        // Show banner if prompt exists and user hasn't dismissed it
-        if (deferredPrompt && !localStorage.getItem('pwa-dismissed')) {
+        // Check if prompt was stashed globally
+        const prompt = window.deferredPrompt || deferredPrompt;
+        if (prompt && !localStorage.getItem('pwa-dismissed')) {
+          if (!deferredPrompt) setDeferredPrompt(prompt);
           setShowInstallBanner(true);
         }
       }
@@ -54,9 +54,19 @@ export default function PWABanner() {
       e.preventDefault();
       // Stash the event so it can be triggered later.
       setDeferredPrompt(e);
+      window.deferredPrompt = e;
       // Show install banner if not dismissed and not in standalone mode
       if (!window.matchMedia('(display-mode: standalone)').matches && !localStorage.getItem('pwa-dismissed')) {
         setShowInstallBanner(true);
+      }
+    };
+
+    const handlePromptReady = () => {
+      if (window.deferredPrompt) {
+        setDeferredPrompt(window.deferredPrompt);
+        if (!window.matchMedia('(display-mode: standalone)').matches && !localStorage.getItem('pwa-dismissed')) {
+          setShowInstallBanner(true);
+        }
       }
     };
 
@@ -64,10 +74,12 @@ export default function PWABanner() {
       setIsInstalled(true);
       setShowInstallBanner(false);
       setDeferredPrompt(null);
+      window.deferredPrompt = null;
       console.log('PWA was installed successfully');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('pwa-prompt-ready', handlePromptReady);
     window.addEventListener('appinstalled', handleAppInstalled);
 
     // Connection status listeners
@@ -89,6 +101,7 @@ export default function PWABanner() {
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('pwa-prompt-ready', handlePromptReady);
       window.removeEventListener('appinstalled', handleAppInstalled);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -96,14 +109,16 @@ export default function PWABanner() {
   }, [deferredPrompt]);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
+    const prompt = deferredPrompt || window.deferredPrompt;
+    if (!prompt) return;
     // Show the install prompt
-    deferredPrompt.prompt();
+    prompt.prompt();
     // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
+    const { outcome } = await prompt.userChoice;
     console.log(`User response to install prompt: ${outcome}`);
     if (outcome === 'accepted') {
       setDeferredPrompt(null);
+      window.deferredPrompt = null;
       setShowInstallBanner(false);
     }
   };
