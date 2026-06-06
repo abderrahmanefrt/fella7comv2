@@ -4,6 +4,7 @@ import { sellers } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
 import { useReview } from '../context/ReviewContext';
+import { useLanguage } from '../context/LanguageContext';
 import ReviewSection from '../components/ReviewSection';
 import './ListingDetail.css';
 
@@ -12,6 +13,7 @@ export default function ListingDetail() {
   const { user, performAction, products } = useAuth();
   const { openConversation } = useChat();
   const { getAverageRating, getProductReviews } = useReview();
+  const { t, translateProductTitle, translateProductDesc, translateWilaya, translateSellerType, language } = useLanguage();
   const navigate = useNavigate();
 
   const product = products.find(p => p.id === id);
@@ -25,16 +27,16 @@ export default function ListingDetail() {
     if (!success) {
       navigate('/premium');
     } else {
-      alert(`Contact du vendeur en cours... Action enregistrée ! (Actions utilisées: ${user.itemsCount + 1})`);
+      alert(t('listingDetail.callActionAlert') + (user.itemsCount + 1) + ')');
     }
   };
 
   if (!product) {
     return (
       <div className="container text-center" style={{padding: '100px 0'}}>
-        <h2>Produit introuvable</h2>
-        <p style={{color: 'var(--color-text-muted)', marginBottom: 'var(--space-lg)'}}>Ce produit n'existe plus ou l'URL est incorrecte.</p>
-        <Link to="/" className="btn-primary">Retour à l'accueil</Link>
+        <h2>{t('listingDetail.unresolvedProduct')}</h2>
+        <p style={{color: 'var(--color-text-muted)', marginBottom: 'var(--space-lg)'}}>{t('listingDetail.unresolvedDesc')}</p>
+        <Link to="/" className="btn-primary">{t('listingDetail.returnHome')}</Link>
       </div>
     );
   }
@@ -43,7 +45,7 @@ export default function ListingDetail() {
   const mockSeller = sellers.find(s => s.id === product.sellerId);
   const seller = mockSeller || {
     id: product.sellerId,
-    name: product.sellerName || user?.name || 'Vendeur',
+    name: product.sellerName || user?.name || (language === 'ar' ? 'بائع' : 'Vendeur'),
     type: product.sellerRole || 'Agriculteur',
     wilaya: product.wilaya,
     experience: 0,
@@ -68,7 +70,7 @@ export default function ListingDetail() {
       <div className="container">
         {/* Breadcrumb */}
         <div className="breadcrumb">
-          <Link to="/">Accueil</Link> &gt; <Link to="/search">Produits</Link> &gt; {product.title}
+          <Link to="/">{t('listingDetail.breadcrumbHome')}</Link> &gt; <Link to="/search">{t('listingDetail.breadcrumbProducts')}</Link> &gt; {translateProductTitle(product.title)}
         </div>
 
         <div className="detail-grid">
@@ -86,18 +88,18 @@ export default function ListingDetail() {
             </div>
 
             <div className="product-info">
-               <h1 className="title">{product.title}</h1>
+               <h1 className="title">{translateProductTitle(product.title)}</h1>
                <div className="price-tag">{product.price} <span className="unit">{product.unit || ''}</span></div>
 
                <div className="specs">
-                 <div className="spec-item"><MapPin size={18}/> {product.wilaya}</div>
-                 <div className="spec-item"><strong>Disponible:</strong> {product.quantity}</div>
-                 <div className="spec-item"><strong>Date:</strong> {product.date}</div>
+                 <div className="spec-item"><MapPin size={18}/> {translateWilaya(product.wilaya)}</div>
+                 <div className="spec-item"><strong>{t('listingDetail.quantityAvailable')}:</strong> {product.quantity}</div>
+                 <div className="spec-item"><strong>{t('listingDetail.postedOn')}:</strong> {product.date}</div>
                </div>
 
                <div className="description">
-                 <h3>Description</h3>
-                 <p>{product.description || 'Aucune description fournie.'}</p>
+                 <h3>{t('listingDetail.description')}</h3>
+                 <p>{translateProductDesc(product.description) || t('listingDetail.noDescription')}</p>
                </div>
             </div>
           </div>
@@ -107,37 +109,37 @@ export default function ListingDetail() {
             <div className="seller-card text-center">
               <div className="seller-avatar" style={{backgroundImage: `url(${seller.avatar})`}}></div>
               <h2>{seller.name}</h2>
-              <div className="seller-type text-primary">{seller.type}</div>
+              <div className="seller-type text-primary">{translateSellerType(seller.type)}</div>
 
               <div className="seller-stats">
                  {seller.rating && (
                    <div className="stat"><Star size={16} fill="var(--color-warning)" color="var(--color-warning)"/> {seller.rating}</div>
                  )}
                  {seller.experience > 0 && (
-                   <div className="stat">{seller.experience} ans exp.</div>
+                   <div className="stat">{seller.experience} {t('listingDetail.years')}</div>
                  )}
               </div>
 
               {mockSeller && (
                 <div className="verification">
-                   <ShieldCheck size={18} className="verified-icon"/> Profil vérifié
+                   <ShieldCheck size={18} className="verified-icon"/> {t('listingDetail.verifiedProfile')}
                 </div>
               )}
 
               <div className="contact-actions">
                  <button className="btn-primary full-width contact-btn" onClick={handleContact}>
-                   <Phone size={18}/> Appeler
+                   <Phone size={18}/> {t('listingDetail.call')}
                  </button>
                  <button className="btn-secondary full-width contact-btn" onClick={handleOpenChat}>
-                   <MessageCircle size={18}/> Envoyer un message
+                   <MessageCircle size={18}/> {t('listingDetail.sendMessage')}
                  </button>
               </div>
             </div>
 
             <div className="map-placeholder text-center">
                <MapPin size={28} color="var(--color-text-muted)"/>
-               <p style={{fontWeight: 600, marginTop: 'var(--space-sm)'}}>{product.wilaya}</p>
-               <div className="map-visual">Carte bientôt disponible</div>
+               <p style={{fontWeight: 600, marginTop: 'var(--space-sm)'}}>{translateWilaya(product.wilaya)}</p>
+               <div className="map-visual">{t('listingDetail.mapComingSoon')}</div>
             </div>
           </div>
         </div>

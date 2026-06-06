@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
 import { Sprout } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 import './Footer.css';
 
 export default function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="footer">
       <div className="container footer-grid">
@@ -11,26 +14,26 @@ export default function Footer() {
             <Sprout size={24} />
             <span>fella7com</span>
           </div>
-          <p>La première marketplace agricole d'Algérie. Connectez producteurs, acheteurs et entreprises agricoles à travers les 69 wilayas.</p>
+          <p>{t('footer.desc')}</p>
         </div>
 
         <div className="footer-col">
-          <h4>Marketplace</h4>
-          <Link to="/search">Tous les produits</Link>
-          <Link to="/new">Nouveautés</Link>
-          <Link to="/post">Vendre un produit</Link>
+          <h4>{t('footer.colMarketplace')}</h4>
+          <Link to="/search">{t('footer.allProducts')}</Link>
+          <Link to="/new">{t('footer.newArrivals')}</Link>
+          <Link to="/post">{t('footer.sellProduct')}</Link>
         </div>
 
         <div className="footer-col">
-          <h4>Compte</h4>
-          <Link to="/login">Se connecter</Link>
-          <Link to="/register">Créer un compte</Link>
-          <Link to="/profile">Mon profil</Link>
-          <Link to="/premium">Premium</Link>
+          <h4>{t('footer.colAccount')}</h4>
+          <Link to="/login">{t('footer.login')}</Link>
+          <Link to="/register">{t('footer.signUp')}</Link>
+          <Link to="/profile">{t('footer.profile')}</Link>
+          <Link to="/premium">{t('footer.premium')}</Link>
         </div>
 
         <div className="footer-col">
-          <h4>Contact</h4>
+          <h4>{t('footer.colContact')}</h4>
           <span>contact@fella7com.com</span>
           <span>+213 555 123 456</span>
           <span>Algiers, Algeria</span>
@@ -38,7 +41,7 @@ export default function Footer() {
       </div>
 
       <div className="container footer-bottom">
-        <span>© 2026 fella7com. Tous droits réservés.</span>
+        <span>{t('footer.rights')}</span>
       </div>
     </footer>
   );

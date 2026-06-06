@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sprout, Briefcase, Tractor, ShoppingCart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { wilayas } from '../data/mockData';
 import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
 import './Auth.css';
 
 export default function Register() {
   const [role, setRole] = useState('agriculteur');
   const { login } = useAuth();
+  const { t, translateWilaya } = useLanguage();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -32,7 +35,7 @@ export default function Register() {
     setPrivacyError('');
 
     if (!acceptedPrivacy) {
-      setPrivacyError("Vous devez accepter la charte de confidentialité pour continuer.");
+      setPrivacyError(t('register.privacyError'));
       return;
     }
 
@@ -58,8 +61,8 @@ export default function Register() {
       <div className="auth-container glass-panel" style={{ maxWidth: '600px' }}>
         <div className="auth-header text-center">
           <Sprout size={48} className="text-primary" style={{ margin: '0 auto var(--spacing-md)' }} />
-          <h1>Join fella7com</h1>
-          <p className="text-muted">Create your account to start trading</p>
+          <h1>{t('register.joinTitle')}</h1>
+          <p className="text-muted">{t('register.joinSubtitle')}</p>
         </div>
 
         <div className="role-selector">
@@ -68,7 +71,7 @@ export default function Register() {
             onClick={() => setRole('agriculteur')}
           >
             <Tractor size={24} />
-            <span>Farmer / Producer</span>
+            <span>{t('register.roleFarmer')}</span>
           </button>
 
           <button
@@ -76,7 +79,7 @@ export default function Register() {
             onClick={() => setRole('buyer')}
           >
             <ShoppingCart size={24} />
-            <span>Buyer</span>
+            <span>{t('register.roleBuyer')}</span>
           </button>
 
           <button
@@ -84,112 +87,51 @@ export default function Register() {
             onClick={() => setRole('business')}
           >
             <Briefcase size={24} />
-            <span>Agri-Business</span>
+            <span>{t('register.roleBusiness')}</span>
           </button>
         </div>
 
         <form className="auth-form" onSubmit={handleRegister}>
           <div className="form-group">
-            <label>Full Name</label>
-            <input name="name" type="text" placeholder="e.g., Ahmed Yassine" value={formData.name} onChange={handleChange} required />
+            <label>{t('register.fullNameLabel')}</label>
+            <input name="name" type="text" placeholder={t('register.fullNamePlaceholder')} value={formData.name} onChange={handleChange} required />
           </div>
 
           <div className="form-group">
-            <label>Email Address</label>
-            <input name="email" type="email" placeholder="e.g., ahmed@example.com" value={formData.email} onChange={handleChange} required />
+            <label>{t('register.emailLabel')}</label>
+            <input name="email" type="email" placeholder={t('register.emailPlaceholder')} value={formData.email} onChange={handleChange} required />
           </div>
 
           <div className="form-group">
-            <label>Profile Picture (URL)</label>
-            <input name="avatar" type="url" placeholder="https://..." value={formData.avatar} onChange={handleChange} />
-            <small className="text-muted" style={{ display: 'block', marginTop: '4px' }}>Paste an image link. We pre-filled a default avatar for you.</small>
+            <label>{t('register.avatarLabel')}</label>
+            <input name="avatar" type="url" placeholder={t('register.avatarPlaceholder')} value={formData.avatar} onChange={handleChange} />
+            <small className="text-muted" style={{ display: 'block', marginTop: '4px' }}>{t('register.avatarHelp')}</small>
           </div>
 
           <div className="form-group">
-            <label>Password</label>
-            <input name="password" type="password" placeholder="Create a password" value={formData.password} onChange={handleChange} required />
+            <label>{t('register.passwordLabel')}</label>
+            <input name="password" type="password" placeholder={t('register.passwordPlaceholder')} value={formData.password} onChange={handleChange} required />
           </div>
 
           {role === 'business' && (
             <div className="form-group">
-              <label>Enterprise Name</label>
-              <input name="company" type="text" placeholder="e.g., Sarl Agro Equipment" value={formData.company} onChange={handleChange} required />
+              <label>{t('register.companyLabel')}</label>
+              <input name="company" type="text" placeholder={t('register.companyPlaceholder')} value={formData.company} onChange={handleChange} required />
             </div>
           )}
 
           <div className="form-group">
-            <label>Wilaya</label>
+            <label>{t('register.wilayaLabel')}</label>
             <select name="wilaya" value={formData.wilaya} onChange={handleChange} required>
-              <option value="">Select Wilaya</option>
-              <option value="Adrar">01 - Adrar</option>
-              <option value="Chlef">02 - Chlef</option>
-              <option value="Laghouat">03 - Laghouat</option>
-              <option value="Oum El Bouaghi">04 - Oum El Bouaghi</option>
-              <option value="Batna">05 - Batna</option>
-              <option value="Bejaia">06 - Béjaïa</option>
-              <option value="Biskra">07 - Biskra</option>
-              <option value="Bechar">08 - Béchar</option>
-              <option value="Blida">09 - Blida</option>
-              <option value="Bouira">10 - Bouira</option>
-              <option value="Tamanrasset">11 - Tamanrasset</option>
-              <option value="Tebessa">12 - Tébessa</option>
-              <option value="Tlemcen">13 - Tlemcen</option>
-              <option value="Tiaret">14 - Tiaret</option>
-              <option value="Tizi Ouzou">15 - Tizi Ouzou</option>
-              <option value="Algiers">16 - Alger</option>
-              <option value="Djelfa">17 - Djelfa</option>
-              <option value="Jijel">18 - Jijel</option>
-              <option value="Setif">19 - Sétif</option>
-              <option value="Saida">20 - Saïda</option>
-              <option value="Skikda">21 - Skikda</option>
-              <option value="Sidi Bel Abbes">22 - Sidi Bel Abbès</option>
-              <option value="Annaba">23 - Annaba</option>
-              <option value="Guelma">24 - Guelma</option>
-              <option value="Constantine">25 - Constantine</option>
-              <option value="Medea">26 - Médéa</option>
-              <option value="Mostaganem">27 - Mostaganem</option>
-              <option value="MSila">28 - M'Sila</option>
-              <option value="Mascara">29 - Mascara</option>
-              <option value="Ouargla">30 - Ouargla</option>
-              <option value="Oran">31 - Oran</option>
-              <option value="El Bayadh">32 - El Bayadh</option>
-              <option value="Illizi">33 - Illizi</option>
-              <option value="Bordj Bou Arreridj">34 - Bordj Bou Arréridj</option>
-              <option value="Boumerdes">35 - Boumerdès</option>
-              <option value="El Tarf">36 - El Tarf</option>
-              <option value="Tindouf">37 - Tindouf</option>
-              <option value="Tissemsilt">38 - Tissemsilt</option>
-              <option value="El Oued">39 - El Oued</option>
-              <option value="Khenchela">40 - Khenchela</option>
-              <option value="Souk Ahras">41 - Souk Ahras</option>
-              <option value="Tipaza">42 - Tipaza</option>
-              <option value="Mila">43 - Mila</option>
-              <option value="Ain Defla">44 - Aïn Defla</option>
-              <option value="Naama">45 - Naâma</option>
-              <option value="Ain Temouchent">46 - Aïn Témouchent</option>
-              <option value="Ghardaia">47 - Ghardaïa</option>
-              <option value="Relizane">48 - Relizane</option>
-              <option value="Timimoun">49 - Timimoun</option>
-              <option value="Bordj Badji Mokhtar">50 - Bordj Badji Mokhtar</option>
-              <option value="Ouled Djellal">51 - Ouled Djellal</option>
-              <option value="Beni Abbes">52 - Béni Abbès</option>
-              <option value="In Salah">53 - In Salah</option>
-              <option value="In Guezzam">54 - In Guezzam</option>
-              <option value="Touggourt">55 - Touggourt</option>
-              <option value="Djanet">56 - Djanet</option>
-              <option value="El MGhair">57 - El M'Ghair</option>
-              <option value="El Meniaa">58 - El Meniaa</option>
-              <option value="Aflou">59 - Aflou</option>
-              <option value="Barika">60 - Barika</option>
-              <option value="El Kantara">61 - El Kantara</option>
-              <option value="Bir El Ater">62 - Bir El Ater</option>
-              <option value="El Aricha">63 - El Aricha</option>
-              <option value="Ksar Chellala">64 - Ksar Chellala</option>
-              <option value="Ain Oussera">65 - Aïn Oussera</option>
-              <option value="Messaad">66 - Messaad</option>
-              <option value="Ksar El Boukhari">67 - Ksar El Boukhari</option>
-              <option value="Bou Saada">68 - Bou Saâda</option>
-              <option value="El Abiodh Sidi Cheikh">69 - El Abiodh Sidi Cheikh</option>
+              <option value="">{t('register.selectWilaya')}</option>
+              {wilayas.filter(w => w !== 'All Wilayas').map((w, index) => {
+                const num = String(index + 1).padStart(2, '0');
+                return (
+                  <option key={w} value={w}>
+                    {num} - {translateWilaya(w)}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -200,13 +142,13 @@ export default function Register() {
                 checked={acceptedPrivacy}
                 onChange={(e) => setAcceptedPrivacy(e.target.checked)}
               />
-              J'accepte la{' '}
+              {t('register.privacyCheckbox')}{' '}
               <button
                 type="button"
                 className="text-primary privacy-link-btn"
                 onClick={() => setShowPrivacyModal(true)}
               >
-                charte de confidentialité
+                {t('register.privacyLinkText')}
               </button>
             </label>
           </div>
@@ -219,12 +161,12 @@ export default function Register() {
             style={{ marginTop: 'var(--spacing-md)' }}
             disabled={!acceptedPrivacy}
           >
-            Create Account
+            {t('register.btnCreateAccount')}
           </button>
         </form>
 
         <div className="auth-footer text-center">
-          Already have an account? <Link to="/login" className="text-primary font-bold">Log in</Link>
+          {t('register.alreadyHaveAccount')} <Link to="/login" className="text-primary font-bold">{t('register.btnLogIn')}</Link>
         </div>
       </div>
 

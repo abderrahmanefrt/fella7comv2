@@ -1,11 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, LogOut, Crown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSwitcher from './LanguageSwitcher';
 import logo from '../assets/fellahcom.png';
 import './Navbar.css';
 
 export default function Navbar() {
   const { user, logout, performAction } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleAction = (e) => {
@@ -18,7 +21,7 @@ export default function Navbar() {
     if (!success) {
       navigate('/premium');
     } else {
-      alert("Action successful! Item count: " + (user.itemsCount + 1));
+      alert(t('navbar.limitAlert') + (user.itemsCount + 1));
     }
   };
 
@@ -33,18 +36,20 @@ export default function Navbar() {
 
         <nav className="nav-links">
           <Link to="/search" className="nav-item">
-            <Search size={20} /> Deals
+            <Search size={20} /> {t('navbar.deals')}
           </Link>
 
           <Link to="/new" className="nav-item">
-            🌟 New Arrivals
+            🌟 {t('navbar.newArrivals')}
           </Link>
 
           <div className="nav-actions">
+            <LanguageSwitcher />
+            
             {!user ? (
               <>
-                <Link to="/login" className="btn-secondary">Log In</Link>
-                <Link to="/register" className="btn-primary">Sign Up</Link>
+                <Link to="/login" className="btn-secondary">{t('navbar.logIn')}</Link>
+                <Link to="/register" className="btn-primary">{t('navbar.signUp')}</Link>
               </>
             ) : (
               <>
@@ -54,18 +59,18 @@ export default function Navbar() {
                     <span className="user-name">{user.name}</span>
                     <span className={`user-plan ${user.plan === 'premium' ? 'text-warning' : ''}`}>
                       {user.plan === 'premium' ? <Crown size={12} /> : ''}
-                      {user.plan.toUpperCase()} ({user.itemsCount}/3 limits)
+                      {user.plan.toUpperCase()} ({user.itemsCount}/3 {t('navbar.limits')})
                     </span>
                   </div>
                 </Link>
 
                 {user.role !== 'buyer' && (
                   <Link to="/post" className="btn-primary">
-                    Post Item
+                    {t('navbar.postItem')}
                   </Link>
                 )}
 
-                <button onClick={logout} className="btn-icon hover-lift" title="Logout">
+                <button onClick={logout} className="btn-icon hover-lift" title={t('navbar.logout')}>
                   <LogOut size={20} color="var(--color-danger)" />
                 </button>
               </>

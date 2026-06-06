@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sprout } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import './Auth.css';
 
 export default function Login() {
   const { login, testAccounts } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -22,7 +24,7 @@ export default function Login() {
       login(account);
       navigate('/');
     } else {
-      setError('Invalid email or password. Please try again.');
+      setError(t('login.errorInvalid'));
     }
   };
 
@@ -31,18 +33,18 @@ export default function Login() {
       <div className="auth-container glass-panel">
         <div className="auth-header text-center">
           <Sprout size={48} className="text-primary" style={{ margin: '0 auto var(--spacing-md)' }} />
-          <h1>Welcome Back</h1>
-          <p className="text-muted">Sign in to your fella7com account</p>
+          <h1>{t('login.welcomeBack')}</h1>
+          <p className="text-muted">{t('login.signInSubtitle')}</p>
         </div>
 
         {error && <div className="text-danger" style={{ marginBottom: 'var(--spacing-md)', textAlign: 'center' }}>{error}</div>}
 
         <form className="auth-form" onSubmit={handleLogin}>
           <div className="form-group">
-            <label>Email Address</label>
+            <label>{t('login.emailLabel')}</label>
             <input
               type="email"
-              placeholder="e.g., buyer@gmail.com"
+              placeholder={t('login.emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -50,7 +52,7 @@ export default function Login() {
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label>{t('login.passwordLabel')}</label>
             <input
               type="password"
               placeholder="••••••••"
@@ -62,28 +64,28 @@ export default function Login() {
 
           <div className="form-options">
             <label className="checkbox-label">
-              <input type="checkbox" /> Remember me
+              <input type="checkbox" /> {t('login.rememberMe')}
             </label>
-            <Link to="/forgot" className="text-primary">Forgot Password?</Link>
+            <Link to="/forgot" className="text-primary">{t('login.forgotPassword')}</Link>
           </div>
 
           <button
             type="submit"
             className="btn-primary full-width auth-btn"
           >
-            Log In
+            {t('login.btnLogIn')}
           </button>
         </form>
 
         <div className="demo-credentials" style={{ marginTop: 'var(--spacing-xl)', padding: 'var(--spacing-md)', background: '#F1F5F9', borderRadius: 'var(--radius-md)', fontSize: '0.85rem' }}>
-          <strong>Demo Testing Accounts:</strong><br />
+          <strong>{t('login.demoAccountsTitle')}</strong><br />
           Farmer: <code>farmer@gmail.com</code> / <code>farmer123</code><br />
           Buyer: <code>buyer@gmail.com</code> / <code>buyer123</code><br />
           Business: <code>business@gmail.com</code> / <code>business123</code>
         </div>
 
         <div className="auth-footer text-center mt-4">
-          <Link to="/" className="text-primary">Cancel & Return to Home</Link>
+          <Link to="/" className="text-primary">{t('login.cancelReturn')}</Link>
         </div>
       </div>
     </div>

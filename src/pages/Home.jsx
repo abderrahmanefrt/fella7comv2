@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { categories, wilayas, mockAds } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import ProductCard from '../components/ProductCard';
 import './Home.css';
 
@@ -80,6 +81,7 @@ const CategoryIcons = {
 
 export default function Home() {
   const { products } = useAuth();
+  const { t, translateCategory, translateWilaya } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWilaya, setSelectedWilaya] = useState('All Wilayas');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -113,31 +115,29 @@ export default function Home() {
       {/* Hero */}
       <section className="hero">
         <div className="container hero-content text-center">
-          <h1 className="hero-title">
-            Le marché agricole <span className="text-primary">algérien</span>
-          </h1>
+          <h1 className="hero-title" dangerouslySetInnerHTML={{ __html: t('home.heroTitle') }} />
           <p className="hero-subtitle">
-            Achetez et vendez fruits, légumes, céréales et matériel agricole directement entre producteurs et acheteurs à travers les 69 wilayas.
+            {t('home.heroSubtitle')}
           </p>
 
           <div className="search-bar">
             <input
               type="text"
-              placeholder="Rechercher un produit..."
+              placeholder={t('common.searchPlaceholder')}
               className="filter-input"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
             <div className="filter-group">
               <select value={selectedWilaya} onChange={e => setSelectedWilaya(e.target.value)} className="filter-select">
-                {wilayas.map(w => <option key={w} value={w}>{w}</option>)}
+                {wilayas.map(w => <option key={w} value={w}>{translateWilaya(w)}</option>)}
               </select>
               <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)} className="filter-select">
-                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {categories.map(c => <option key={c.id} value={c.id}>{translateCategory(c.id)}</option>)}
               </select>
             </div>
             <button className="btn-primary search-btn">
-              {filteredProducts.length} résultats
+              {filteredProducts.length} {filteredProducts.length > 1 ? t('common.results') : t('common.result')}
             </button>
           </div>
 
@@ -152,7 +152,7 @@ export default function Home() {
                 <span className="mini-icon">
                   {CategoryIcons[c.id] || CategoryIcons.fertilizers}
                 </span>
-                <span className="mini-name">{c.name}</span>
+                <span className="mini-name">{translateCategory(c.id)}</span>
               </div>
             ))}
           </div>
@@ -168,7 +168,7 @@ export default function Home() {
           }}
         >
           <div className="promo-content">
-            <span className="promo-tag">{mockAds[currentPromoIndex].tag}</span>
+            <span className="promo-tag">{t('common.sponsored')}</span>
             <h2 className="promo-title">{mockAds[currentPromoIndex].title}</h2>
             <p className="promo-desc">{mockAds[currentPromoIndex].description}</p>
             <button className="btn-primary promo-cta">{mockAds[currentPromoIndex].company} →</button>
@@ -203,8 +203,8 @@ export default function Home() {
       {/* Listings */}
       <section className="listings container">
         <div className="section-header">
-          <h2>Dernières annonces</h2>
-          <p className="text-muted">Produits frais du champ à votre table.</p>
+          <h2>{t('home.latestListings')}</h2>
+          <p className="text-muted">{t('home.listingsSubtitle')}</p>
         </div>
 
         {filteredProducts.length > 0 ? (
@@ -213,13 +213,13 @@ export default function Home() {
           </div>
         ) : (
           <div className="empty-state text-center">
-            <h3>Aucun produit trouvé</h3>
-            <p className="text-muted">Essayez de modifier vos filtres de wilaya ou catégorie.</p>
+            <h3>{t('home.noProductsFound')}</h3>
+            <p className="text-muted">{t('home.emptyFiltersDesc')}</p>
           </div>
         )}
 
         <div className="text-center" style={{ marginTop: 'var(--space-xl)' }}>
-          <Link to="/search" className="btn-secondary">Voir tous les produits →</Link>
+          <Link to="/search" className="btn-secondary">{t('home.seeAllProducts')}</Link>
         </div>
       </section>
     </div>

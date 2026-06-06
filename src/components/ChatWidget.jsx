@@ -4,22 +4,23 @@ import { MessageCircle, X, Send, ArrowLeft, ChevronDown, CreditCard, Shield, Loc
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
 import { OFFER_STATUS } from '../context/ChatContext';
+import { useLanguage } from '../context/LanguageContext';
 import './ChatWidget.css';
 
-function formatTime(timestamp) {
+function formatTime(timestamp, language) {
   const date = new Date(timestamp);
-  return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleTimeString(language === 'ar' ? 'ar-DZ' : 'fr-FR', { hour: '2-digit', minute: '2-digit' });
 }
 
-function formatDate(timestamp) {
+function formatDate(timestamp, language) {
   const date = new Date(timestamp);
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
-  if (date.toDateString() === today.toDateString()) return "Aujourd'hui";
-  if (date.toDateString() === yesterday.toDateString()) return 'Hier';
-  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  if (date.toDateString() === today.toDateString()) return language === 'ar' ? 'اليوم' : "Aujourd'hui";
+  if (date.toDateString() === yesterday.toDateString()) return language === 'ar' ? 'أمس' : 'Hier';
+  return date.toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR', { day: 'numeric', month: 'short' });
 }
 
 function formatPrice(num) {
@@ -27,14 +28,14 @@ function formatPrice(num) {
 }
 
 // Group messages by date
-function groupMessagesByDate(messages) {
+function groupMessagesByDate(messages, language) {
   const groups = [];
   let currentDate = '';
   messages.forEach(msg => {
     const dateStr = new Date(msg.timestamp).toDateString();
     if (dateStr !== currentDate) {
       currentDate = dateStr;
-      groups.push({ type: 'date', date: formatDate(msg.timestamp), key: 'date_' + dateStr });
+      groups.push({ type: 'date', date: formatDate(msg.timestamp, language), key: 'date_' + dateStr });
     }
     groups.push({ type: msg.type || 'message', ...msg, key: msg.id });
   });
@@ -45,6 +46,7 @@ function groupMessagesByDate(messages) {
 // Payment Modal — full-screen payment form
 // ═══════════════════════════════════════
 function PaymentModal({ offer, onPay, onCancel }) {
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     cardNumber: '',
     cardName: '',
@@ -103,7 +105,7 @@ function PaymentModal({ offer, onPay, onCancel }) {
                   <Lock size={22} />
                 </div>
                 <div>
-                  <h4>Paiement sécurisé</h4>
+                  <h4>{t('chat.securePayment')}</h4>
                   <span className="payment-secure-badge">
                     <Shield size={14} /> SSL 256-bit
                   </span>
@@ -119,7 +121,7 @@ function PaymentModal({ offer, onPay, onCancel }) {
                   <span className="payment-product-emoji"></span>
                   <div className="payment-product-info">
                     <strong>{offer.product}</strong>
-                    <span>Quantité: {offer.quantity}</span>
+                    <span>{t('chat.quantity')}: {offer.quantity}</span>
                   </div>
                 </div>
 
@@ -127,22 +129,22 @@ function PaymentModal({ offer, onPay, onCancel }) {
 
                 {offer.unitPrice && (
                   <div className="payment-summary-row">
-                    <span>Prix unitaire</span>
+                    <span>{t('chat.unitPrice')}</span>
                     <span>{formatPrice(offer.unitPrice)} DA {offer.unitLabel || ''}</span>
                   </div>
                 )}
                 <div className="payment-summary-row">
-                  <span>Sous-total ({offer.quantity})</span>
+                  <span>{t('chat.subtotal')} ({offer.quantity})</span>
                   <span>{formatPrice(offer.price)} DA</span>
                 </div>
                 {Number(offer.delivery) > 0 && (
                   <div className="payment-summary-row">
-                    <span>🚚 Livraison</span>
+                    <span>{t('chat.delivery')}</span>
                     <span>{formatPrice(offer.delivery)} DA</span>
                   </div>
                 )}
                 <div className="payment-summary-total">
-                  <span>Total à payer</span>
+                  <span>{t('chat.totalToPay')}</span>
                   <strong>{formatPrice(offer.total)} DA</strong>
                 </div>
               </div>
@@ -150,7 +152,7 @@ function PaymentModal({ offer, onPay, onCancel }) {
 
             <form className="payment-form" onSubmit={handleSubmit}>
               <div className="payment-field">
-                <label>Numéro de carte</label>
+                <label>{t('chat.cardNumber')}</label>
                 <div className="payment-input-icon">
                   <CreditCard size={20} className="field-icon" />
                   <input
@@ -168,7 +170,7 @@ function PaymentModal({ offer, onPay, onCancel }) {
               </div>
 
               <div className="payment-field">
-                <label>Nom sur la carte</label>
+                <label>{t('chat.cardName')}</label>
                 <input
                   type="text"
                   placeholder="MOHAMMED SALIM"
@@ -179,7 +181,7 @@ function PaymentModal({ offer, onPay, onCancel }) {
 
               <div className="payment-field-row">
                 <div className="payment-field">
-                  <label>Expiration</label>
+                  <label>{t('chat.expiration')}</label>
                   <input
                     type="text"
                     placeholder="MM/AA"
@@ -204,11 +206,11 @@ function PaymentModal({ offer, onPay, onCancel }) {
                 disabled={!isValid}
               >
                 <Lock size={18} />
-                Payer {formatPrice(offer.total)} DA
+                {t('chat.btnPay')} {formatPrice(offer.total)} DA
               </button>
 
               <p className="payment-disclaimer">
-                🔒 Vos informations sont protégées par un cryptage de niveau bancaire.
+                {t('chat.secureDisclaimer')}
               </p>
             </form>
           </>
@@ -218,8 +220,8 @@ function PaymentModal({ offer, onPay, onCancel }) {
         {step === 'processing' && (
           <div className="payment-processing">
             <div className="payment-spinner"></div>
-            <h4>Traitement en cours...</h4>
-            <p>Veuillez patienter, nous vérifions votre paiement.</p>
+            <h4>{t('chat.processing')}</h4>
+            <p>{t('chat.processingDesc')}</p>
           </div>
         )}
 
@@ -229,8 +231,8 @@ function PaymentModal({ offer, onPay, onCancel }) {
             <div className="payment-success-icon">
               <CheckCircle size={64} />
             </div>
-            <h4>Paiement réussi ! 🎉</h4>
-            <p>Votre commande a été confirmée.</p>
+            <h4>{t('chat.paymentSuccess')}</h4>
+            <p>{t('chat.paymentSuccessDesc')}</p>
             <span className="payment-success-amount">{formatPrice(offer.total)} DA</span>
           </div>
         )}
@@ -245,6 +247,7 @@ function PaymentModal({ offer, onPay, onCancel }) {
 // Offer Card — displayed in chat messages
 // ═══════════════════════════════════════
 function OfferCard({ offer, isMe, conversationId }) {
+  const { t } = useLanguage();
   const [showPayment, setShowPayment] = useState(false);
   const { payOffer } = useChat();
 
@@ -264,41 +267,41 @@ function OfferCard({ offer, isMe, conversationId }) {
         <div className="offer-card-header">
           <div className="offer-card-icon"></div>
           <div className="offer-card-title">
-            <strong>Récapitulatif de commande</strong>
-            {isPending && <span className="offer-badge pending">💳 En attente de paiement</span>}
-            {isPaid && <span className="offer-badge paid"> Payé</span>}
+            <strong>{t('chat.orderSummary')}</strong>
+            {isPending && <span className="offer-badge pending">{t('chat.awaitingPayment')}</span>}
+            {isPaid && <span className="offer-badge paid">{t('chat.paid')}</span>}
           </div>
         </div>
 
         <div className="offer-card-details">
           <div className="offer-detail-row">
-            <span className="offer-label">Produit</span>
+            <span className="offer-label">{t('chat.product')}</span>
             <span className="offer-value">{offer.product}</span>
           </div>
           <div className="offer-detail-row">
-            <span className="offer-label">Quantité</span>
+            <span className="offer-label">{t('chat.quantity')}</span>
             <span className="offer-value">{offer.quantity}</span>
           </div>
           {offer.unitPrice && (
             <div className="offer-detail-row">
-              <span className="offer-label">Prix unitaire</span>
+              <span className="offer-label">{t('chat.unitPrice')}</span>
               <span className="offer-value">{formatPrice(offer.unitPrice)} DA {offer.unitLabel || ''}</span>
             </div>
           )}
           <div className="offer-detail-row">
-            <span className="offer-label">Sous-total</span>
+            <span className="offer-label">{t('chat.subtotal')}</span>
             <span className="offer-value">{formatPrice(offer.price)} DA</span>
           </div>
           {Number(offer.delivery) > 0 && (
             <div className="offer-detail-row">
-              <span className="offer-label"> Livraison</span>
+              <span className="offer-label">{t('chat.delivery')}</span>
               <span className="offer-value">{formatPrice(offer.delivery)} DA</span>
             </div>
           )}
         </div>
 
         <div className="offer-card-total">
-          <span>Total</span>
+          <span>{t('chat.total')}</span>
           <strong>{formatPrice(offer.total)} DA</strong>
         </div>
 
@@ -309,21 +312,21 @@ function OfferCard({ offer, isMe, conversationId }) {
             onClick={() => setShowPayment(true)}
           >
             <CreditCard size={16} />
-            💳 Payer maintenant
+            {t('chat.payNow')}
           </button>
         )}
 
         {isPending && isMe && (
           <div className="offer-waiting">
             <div className="waiting-dots"><span></span><span></span><span></span></div>
-            En attente du paiement...
+            {t('chat.awaitingPaymentDots')}
           </div>
         )}
 
         {isPaid && (
           <div className="offer-paid-badge">
             <CheckCircle size={16} />
-            Paiement confirmé
+            {t('chat.paymentConfirmed')}
           </div>
         )}
       </div>
@@ -344,13 +347,14 @@ function OfferCard({ offer, isMe, conversationId }) {
 // ═══════════════════════════════════════
 function ConversationList({ onSelectConversation }) {
   const { userConversations } = useChat();
+  const { t, language } = useLanguage();
 
   if (userConversations.length === 0) {
     return (
       <div className="chat-empty-state">
         <MessageCircle size={40} strokeWidth={1.2} />
-        <p>Aucune conversation</p>
-        <span>Contactez un vendeur depuis une annonce pour démarrer une conversation.</span>
+        <p>{t('chat.noConversations')}</p>
+        <span>{t('chat.noConversationsDesc')}</span>
       </div>
     );
   }
@@ -378,7 +382,7 @@ function ConversationList({ onSelectConversation }) {
           <div className="chat-conv-info">
             <div className="chat-conv-top">
               <span className="chat-conv-name">{conv.sellerName}</span>
-              <span className="chat-conv-time">{formatTime(conv.lastTimestamp)}</span>
+              <span className="chat-conv-time">{formatTime(conv.lastTimestamp, language)}</span>
             </div>
             <p className="chat-conv-preview">{conv.lastMessage}</p>
           </div>
@@ -394,6 +398,7 @@ function ConversationList({ onSelectConversation }) {
 function MessageThread({ conversationId, onBack }) {
   const { user } = useAuth();
   const { conversations, sendMessage, markAsRead } = useChat();
+  const { t, language } = useLanguage();
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
@@ -417,7 +422,7 @@ function MessageThread({ conversationId, onBack }) {
 
   if (!conv) return null;
 
-  const items = groupMessagesByDate(conv.messages);
+  const items = groupMessagesByDate(conv.messages, language);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -452,7 +457,7 @@ function MessageThread({ conversationId, onBack }) {
         </div>
         <div className="chat-thread-info">
           <span className="chat-thread-name">{conv.sellerName}</span>
-          <span className="chat-thread-status">En ligne</span>
+          <span className="chat-thread-status">{t('chat.online')}</span>
         </div>
       </div>
 
@@ -495,7 +500,7 @@ function MessageThread({ conversationId, onBack }) {
             <div key={item.key} className={`chat-bubble-wrapper ${isMe ? 'sent' : 'received'}`}>
               <div className={`chat-bubble ${isMe ? 'chat-bubble-sent' : 'chat-bubble-received'}`}>
                 <p>{item.text}</p>
-                <span className="chat-bubble-time">{formatTime(item.timestamp)}</span>
+                <span className="chat-bubble-time">{formatTime(item.timestamp, language)}</span>
               </div>
             </div>
           );
@@ -518,7 +523,7 @@ function MessageThread({ conversationId, onBack }) {
         <input
           ref={inputRef}
           type="text"
-          placeholder="Écrire un message..."
+          placeholder={t('chat.inputPlaceholder')}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -541,6 +546,7 @@ function MessageThread({ conversationId, onBack }) {
 export default function ChatWidget() {
   const { user } = useAuth();
   const { isChatOpen, setIsChatOpen, activeConversationId, setActiveConversationId, totalUnread } = useChat();
+  const { t } = useLanguage();
   const [view, setView] = useState('list');
 
   useEffect(() => {
@@ -577,7 +583,7 @@ export default function ChatWidget() {
       <button
         className={`chat-fab ${isChatOpen ? 'open' : ''}`}
         onClick={toggleChat}
-        title={isChatOpen ? 'Fermer le chat' : 'Messages'}
+        title={isChatOpen ? t('chat.dismissBtn') : t('chat.panelTitle')}
         id="chat-toggle-button"
       >
         {isChatOpen ? <ChevronDown size={24} /> : <MessageCircle size={24} />}
@@ -589,7 +595,7 @@ export default function ChatWidget() {
       {isChatOpen && (
         <div className="chat-panel animate-slide-up">
           <div className="chat-panel-header">
-            <h3>💬 Messages</h3>
+            <h3>💬 {t('chat.panelTitle')}</h3>
           </div>
 
           {view === 'list' ? (

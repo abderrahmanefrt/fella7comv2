@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { Download, X, WifiOff, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 import './PWABanner.css';
 
 export default function PWABanner() {
@@ -10,6 +11,7 @@ export default function PWABanner() {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [showOfflineToast, setShowOfflineToast] = useState(false);
   const [showOnlineToast, setShowOnlineToast] = useState(false);
+  const { t } = useLanguage();
 
   // useRegisterSW hook from vite-plugin-pwa
   const {
@@ -122,7 +124,7 @@ export default function PWABanner() {
       {isOffline && (
         <div className="pwa-offline-alert animate-slide-down">
           <WifiOff size={16} />
-          <span>You are currently browsing offline. Some features may be limited.</span>
+          <span>{t('pwa.offlineAlert')}</span>
         </div>
       )}
 
@@ -132,8 +134,8 @@ export default function PWABanner() {
           <div className="pwa-toast-content">
             <CheckCircle2 size={20} className="toast-icon" />
             <div>
-              <h4>Connection Restored</h4>
-              <p>You are back online. Pages will update automatically.</p>
+              <h4>{t('pwa.onlineToastTitle')}</h4>
+              <p>{t('pwa.onlineToastDesc')}</p>
             </div>
           </div>
         </div>
@@ -145,8 +147,8 @@ export default function PWABanner() {
           <div className="pwa-toast-content">
             <CheckCircle2 size={20} className="toast-icon" />
             <div>
-              <h4>Ready for Offline Use</h4>
-              <p>fella7com is cached and ready to work offline.</p>
+              <h4>{t('pwa.readyToastTitle')}</h4>
+              <p>{t('pwa.readyToastDesc')}</p>
             </div>
             <button onClick={closeOfflineReady} className="pwa-toast-close">
               <X size={16} />
@@ -161,12 +163,12 @@ export default function PWABanner() {
           <div className="pwa-toast-content">
             <RefreshCw size={20} className="toast-icon spin" />
             <div>
-              <h4>Update Available</h4>
-              <p>A new version of the app is ready. Reload to update.</p>
+              <h4>{t('pwa.updateToastTitle')}</h4>
+              <p>{t('pwa.updateToastDesc')}</p>
             </div>
             <div className="pwa-toast-actions">
               <button onClick={() => updateServiceWorker(true)} className="pwa-btn-reload">
-                Reload
+                {t('pwa.updateBtn')}
               </button>
               <button onClick={closeNeedRefresh} className="pwa-toast-close">
                 <X size={16} />
@@ -182,17 +184,17 @@ export default function PWABanner() {
           <div className="pwa-install-content">
             <img src="/favicon.svg" alt="fella7com Logo" className="pwa-app-logo" />
             <div className="pwa-install-text">
-              <h3>Install fella7com</h3>
-              <p>Add to your home screen for full-screen offline access and better performance.</p>
+              <h3>{t('pwa.installTitle')}</h3>
+              <p>{t('pwa.installDesc')}</p>
             </div>
           </div>
           <div className="pwa-install-actions">
             <button onClick={handleInstallClick} className="pwa-btn-install">
               <Download size={16} />
-              Install
+              {t('pwa.installBtn')}
             </button>
             <button onClick={dismissInstallBanner} className="pwa-btn-dismiss">
-              Dismiss
+              {t('pwa.dismissBtn')}
             </button>
           </div>
         </div>

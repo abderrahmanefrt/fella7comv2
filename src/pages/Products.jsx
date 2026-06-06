@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { categories, wilayas } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import ProductCard from '../components/ProductCard';
 
 export default function Products() {
   const { products } = useAuth();
+  const { t, translateCategory, translateWilaya } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWilaya, setSelectedWilaya] = useState('All Wilayas');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -27,9 +29,9 @@ export default function Products() {
     <div className="animate-fade-in" style={{background: 'var(--color-bg)', minHeight: 'calc(100vh - 64px)', padding: 'var(--space-xl) 0 var(--space-2xl)'}}>
       <div className="container">
         <div style={{marginBottom: 'var(--space-xl)'}}>
-          <h1>Tous les produits</h1>
+          <h1>{t('products.allProducts')}</h1>
           <p style={{color: 'var(--color-text-secondary)', fontSize: '0.95rem'}}>
-            {filteredProducts.length} annonce{filteredProducts.length !== 1 ? 's' : ''} disponible{filteredProducts.length !== 1 ? 's' : ''}
+            {filteredProducts.length} {filteredProducts.length > 1 ? t('products.availableListings') : t('products.availableListing')}
           </p>
         </div>
 
@@ -37,20 +39,20 @@ export default function Products() {
         <div style={{display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap', marginBottom: 'var(--space-xl)', padding: 'var(--space-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)'}}>
           <input
             type="text"
-            placeholder="Rechercher..."
+            placeholder={t('products.searchPlaceholder')}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             style={{flex: '2 1 200px', minWidth: '150px'}}
           />
           <select value={selectedWilaya} onChange={e => setSelectedWilaya(e.target.value)} style={{flex: '1 1 140px'}}>
-            {wilayas.map(w => <option key={w} value={w}>{w}</option>)}
+            {wilayas.map(w => <option key={w} value={w}>{translateWilaya(w)}</option>)}
           </select>
           <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)} style={{flex: '1 1 140px'}}>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            {categories.map(c => <option key={c.id} value={c.id}>{translateCategory(c.id)}</option>)}
           </select>
           <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{flex: '1 1 120px'}}>
-            <option value="newest">Plus récents</option>
-            <option value="oldest">Plus anciens</option>
+            <option value="newest">{t('products.sortNewest')}</option>
+            <option value="oldest">{t('products.sortOldest')}</option>
           </select>
         </div>
 
@@ -60,8 +62,8 @@ export default function Products() {
           </div>
         ) : (
           <div className="empty-state text-center">
-            <h3>Aucun produit trouvé</h3>
-            <p style={{color: 'var(--color-text-muted)'}}>Essayez de modifier vos filtres.</p>
+            <h3>{t('home.noProductsFound')}</h3>
+            <p style={{color: 'var(--color-text-muted)'}}>{t('home.emptyFiltersDesc')}</p>
           </div>
         )}
       </div>
