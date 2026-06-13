@@ -12,7 +12,7 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'offline.html'],
       manifest: {
         name: 'fella7com',
-        short_name: 'fella7',
+        short_name: 'fella7com',
         description: 'Agricultural E-Commerce and Listing Portal',
         theme_color: '#2d6a4f',
         background_color: '#fdfdfb',
